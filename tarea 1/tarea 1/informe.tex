@@ -1,0 +1,105 @@
+\documentclass[10pt,A4]{article}
+\setlength{\parskip}{3ex}
+
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}% útil para que ponga letras acentuadas y no junte una vocal con un acento.
+
+
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{color}
+
+
+\addtolength{\textheight}{1.5in}
+\addtolength{\textwidth}{1.2in}
+\addtolength{\topmargin}{-0.6in}
+\addtolength{\oddsidemargin}{-0.6in}
+\parskip 1ex
+
+\def \I{\mathop{\perp\hspace*{-1em}\perp}}
+
+\newcommand{\bbeta}{{\boldsymbol \beta}}
+\newcommand{\by}{{\boldsymbol y}}
+\newcommand{\bY}{{\boldsymbol Y}}
+\newcommand{\bmu}{{\boldsymbol \mu}}
+\newcommand{\bX}{{\boldsymbol X}}
+\newcommand{\bx}{{\boldsymbol x}}
+\newcommand{\bDelta}{{\boldsymbol \Delta}}
+\newcommand{\bW}{{\boldsymbol W}}
+\newcommand{\btheta}{{\boldsymbol \theta}}
+\newcommand{\bI}{{\boldsymbol I}}
+\newcommand{\R}{{\mathbb{R}}}
+\newcommand{\N}{{\mathbb{N}}}
+\providecommand{\abs}[1]{\lvert#1\rvert}
+\providecommand{\norm}[1]{\lVert#1\rVert}
+\renewcommand{\theenumii}{\Alph{enumii}} %Letras mayúsculas
+\begin{document}
+
+\begin{center} 
+\textbf{\Large Interrogación I parte II} 
+\end{center}
+
+\begin{center}
+\textbf{ \LARGE{Series de tiempo}}
+\end{center}
+
+\begin{flushright}
+    \noindent \textbf{Profesor}: Ricardo Olea\\
+    \noindent \textbf{estudiantes}: Maximiliano Norbu \\ Sebastián Cabezas\\
+    \noindent \textbf{Fecha}: 11/10/2022
+\end{flushright}
+
+\bigskip
+\bigskip
+
+    \section*{Modelos}
+
+    \textbf{Mediante técnicas de regresión lineal o no lineal, ajuste el comportamiento de la serie de venta mensual}
+    
+    En este trabajo realizamos 11 modelos de regresion lineal, en los cuales fuimos añadiendo variables
+    y analizando el aporte que tenían en la representación de un modelo correcto. Las variables
+    dependientes para cada modelo fueron las siguientes:
+    \begin{enumerate}
+        \item IPC + drift: Con el IPC el modelo queda bastante mal ajustado, por lo que probamos con otra variable.
+        \item Apertura del dolar + drift: Con la apertura del dolar queda un poco mejor que con el IPC aunque tampco
+        creemos que sea la variable macroeconomica apropiada. Cambiamos la apertura del dolar con la variación.
+        \item Variación del dolar + drift: No ajusta para nada correcto. Seguimos probando con otras variables.
+        \item IMACEC + drift: La variable IMACEC al menos aporta a la caida final del modelo. Esta nos aporta
+        información por lo que la dejamos y seguimos añadiendo más variables.
+        \item IMACEC + pase de movilidad + drift: El pase de movilidad ayuda un poco a modelar la tendencia.
+        \item IMACEC + pase de movilidad + mes(factor) + drift: Agregando los meses como factores nos acercamos mucho más a un ajuste apropiado. Seguimos añadiendo variables para ver si mejora el modelo.
+        \item IMACEC + pase de movilidad + mes(factor) + fecha estallido social + drift: mejora un poco al final del 2019. 
+        \item IMACEC + pase de movilidad + mes(factor) + fecha estallido social (factor) + drift(bs): Pareciera que el modelo mejora en general comparandolo con el modelo anterior. Para ver con cual seguimos analizamos medidas de error, en las cuales nos dio como resultados que el ultimo modelo tiene un mayor $R^2$ y un menor AIC. Analizando la medida de error que se comentó en el enunciado, el MAPE, obtenemos que este es menor en el ultimo modelo.
+        \item IMACEC + pase de movilidad + mes(factor) + fecha estallido social (factor) + retiros (factor) + drift(bs): Se nota similar al anterior. Tambien analizamos las medidas de bondad de ajuste que son similares. intentamos otra cosa con los retiros del 10\%:
+        \item IMACEC + pase de movilidad + mes(factor) + fecha estallido social (factor) + retiro1 (factor) + retiro2 (factor) + retiro3 (factor) + drift(bs): Aparenta que el modelo ajusta mejor, para confirmar analizamos medidas de bondad de ajuste, ajustando mejor pero no conformes con esto, probamos con el primer mes de cada retiro, el segundo mes de cada retiro y el mes posterior a cada retiro ya que allí probablemente la gente tenia menos dinero:
+        \item IMACEC + pase de movilidad + mes(factor) + fecha estallido social (factor) + mes 1 retiro (factor) + mes 2 retiro (factor) + mes post retiro (factor) + drift(bs): podemos ver que ajustan similar y que los indices de bondad de ajuste son similares. Probamos añadiendo la temperatura.
+        \item IMACEC + pase de movilidad + mes(factor) + fecha estallido social (factor) + mes 1 retiro (factor) + mes 2 retiro (factor) + mes post retiro (factor) + temperatura + drift(bs): Tambien probamos el mismo modelo con los retiros:
+        \item IMACEC + pase de movilidad + mes(factor) + fecha estallido social (factor) + retiro1 (factor) + retiro2 (factor) + retiro3 (factor) + temperatura + drift(bs): Analizamos los indices de bondad de ajuste de estos ultimos modelos y notamos que el ultimo modelo y el 11 ajustan mejor, el ultimo en base al MAPE y AIC mientras que el 11 en base al $R^2$. Realizando un summary notamos que la temperatura, el IMACEC y la parte cubica del spline no son significativos. iremos eliminando estas variables en ambos modelos y analizamos que tal.
+        \item pase de movilidad + mes(factor) + fecha estallido social (factor) + mes 1 retiro (factor) + mes 2 retiro (factor) + mes post retiro (factor) + drift(bs): Los indices de bondad de ajuste estn muy bien, ahora eliminamos el grado 3 del bs:
+        \item pase de movilidad + mes(factor) + fecha estallido social (factor) + mes 1 retiro (factor) + mes 2 retiro (factor) + mes post retiro (factor) + drift(bs, degree = 2): Enpeoran un poco los indices de bondad de ajuste, pero seguimos eliminando por parsimonia.
+    \end{enumerate}
+
+    \textbf{Modelos finales:}
+
+    \begin{enumerate}
+        \item Pase de movilidad + mes (factor) + estallido (factor) + drift (bs, degree = 2) + Retiro2 (factor)
+        \item Pase de movilidad + mes (factor) + estallido (factor) + drift (bs, degree = 2) + retiro segundo mes (factor)
+    \end{enumerate}
+
+    Se intentó realizar una transformación de Box-Cox a estos modelos finales, sin embargo, los intervalos contienen
+    al 1 por lo que se decide no realizar la transformación.
+
+    Posterior a todo esto, realizamos una predicción simplemente para ver que tal se vería, el resultado se puede apreciar en imagen 1 al final del documento. Podemos notar que ambas predicciones se ven razonables. Analizaremos los residuos de ambos modelos y les realizaremos un teste de blancura. Las imegenes de estos residuos se presentan al final del documento, en la imagen 2. En esta, a simple vista, no se ve que se comporte como ruido blanco, realizamos graficos de ACF y PACF (imagen 3) y TS.diag (box-Ljung) (imagen 4), confirmamos lo comentado. Por los graficos de ACF y PACF creemos apostamos por un modelo MA(1) o MA(2)
+
+    Continuamos con un auto.arima() para ver que sugiere R, para los residuos en ambos sugiere un arima(1,0,0), graficamos para ver que tal estos modelos (imagen 5) y notamos que graficamente se ven bien. Analizamos los indices de bondad de ajuste y obtenemos que tienen un AIC muy similar aunque el MAPE del segundo es mucho más bajo. Ploteamos los residuos de los residuos para ver si se comportan como ruido blanco (imagen 6) y segun los graficos, parece que si. Graficamos ACF y PAFC (Imagen 7) y box-Ljung (Imagen 8) en ambos se ven muy bien, con algun punto cuestionable pero por lo general bien. Realizamos un autoarima para los residuos y en este caso vamos a realizar una diferenciación. En estos obtenemos 
+
+
+
+    
+
+
+\end{document}
