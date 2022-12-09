@@ -1,0 +1,99 @@
+#####################
+## Script Clase 25 ##
+#####################
+
+## Modelo INAR(1)
+
+## Simulación
+set.seed(2905)
+n <- 200
+lambda <- 10
+alpha = 0.6
+e <- rpois(n, lambda)
+Y <- c()
+Y[1] = e[1]
+for(t in 2:n){
+	Y[t] = rbinom(1, size = Y[t-1], prob = alpha) + e[t]	
+}
+
+Y <- ts(Y)
+par(mfrow = c(1,1), bty = "n", las = 1)
+plot(Y, type = "s")
+
+par(mfrow = c(1,2), bty = "n", las = 1)
+acf(Y, ylim = c(-1,1), lag.max = 10, xlim = c(0,10), main = "")
+pacf(Y, ylim = c(-1,1), lag.max = 10, xlim = c(0,10), main = "")
+
+
+## I2 - Parte II ##
+source("TS.diag.R")
+source("summary.arima.R")
+
+Data <- rio::import("OR012.xlsx")
+head(Data)
+Y <- ts(Data$Value, start = 1501)
+
+par(mfrow = c(1,1), bty = "n", las = 1)
+plot(Y)
+
+par(mfrow = c(1,2), bty = "n", las = 1)
+acf(Y, ylim = c(-1,1), lag.max = 10, xlim = c(0,10), main = "")
+pacf(Y, ylim = c(-1,1), lag.max = 10, xlim = c(0,10), main = "")
+
+## Modelo auto.arima
+fit <- forecast::auto.arima(Y)
+TS.diag(fit$res)
+
+## Modelo Arima (mejorado)
+fixed <- c(NA,NA,0,0,0,0,0,0,NA,NA,0,0,0,NA,NA)
+fit <- forecast::Arima(Y, order = c(1,0,13), fixed = fixed)
+TS.diag(fit$res)
+summary_arima(fit, fixed = fixed)
+plot(fit)
+ks.test(scale(fit$res), "pnorm")
+lmtest::bptest(lm(fit$res~time(fit$res)))
+r2 <- 1-var(fit$res)/var(Y)
+r2 ## 17.3%
+summary(fit) ## 27.5% MAPE
+
+par(mfrow = c(1,1), bty = "n", las = 1)
+plot(Y)
+lines(fit$fitted, col = "red")
+
+pred <- forecast::forecast(fit, 100)
+plot(pred)
+lines(pred$fitted, col = "red")
+
+############################
+## Estimación por Whittle ##
+############################
+
+whittle.loglik = function(x, serie, p = 1, q = 1){
+Y = serie
+n = length(Y)
+ar  = x[1:p]
+ma  = x[(p+1):(p+q)]
+if(p == 0){ar = numeric()}
+if(q == 0){ma = numeric()}
+sigma = x[p+q+1]
+aux = LSTS::periodogram(Y, plot = F)
+I = aux$periodogram
+lambda = aux$lambda
+f = LSTS::spectral.density(ar = ar, ma = ma, sd = sigma, lambda = lambda)
+aux = 0.5*(sum(log(f)) + sum(I/f))/n
+aux
+}
+
+fit2 = nlminb(start = c(fit$coef[1:14],0.2), objective = whittle.loglik, serie = Y-mean(Y), p = 1, q = 13)$par
+
+fit3 <- forecast::Arima(Y-mean(Y), order = c(1,0,13), fixed = fit2[1:14], include.mean = F)
+
+par(mfrow = c(1,1), bty = "n", las = 1)
+plot(Y)
+lines(fit3$fitted+mean(Y), col = "red")
+
+## r2
+1-var(fit3$res)/var(Y)
+
+## MAPE
+100*mean(abs(fit3$res/Y))
