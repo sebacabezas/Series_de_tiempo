@@ -1,9 +1,9 @@
 {
     "id": "610FD572",
-    "path": "~/Universidad/2022-2/Series de tiempo/proyecto/proyecto/script.R",
+    "path": "~/Universidad/2022-2/Series de tiempo/git/Series_de_tiempo/proyecto/proyecto/script.R",
     "project_path": "script.R",
     "type": "r_source",
-    "hash": "3041183317",
+    "hash": "3373075263",
     "contents": "",
     "dirty": false,
     "created": 1670515324898.0,
@@ -13,15 +13,15 @@
         "tempName": "Untitled1",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "135,0",
-        "scrollLine": "121"
+        "cursorPosition": "86,0",
+        "scrollLine": "70"
     },
     "folds": "",
-    "lastKnownWriteTime": 1670614981,
+    "lastKnownWriteTime": 1670783221,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1670614981145,
+    "last_content_update": 1670783221867,
     "read_only": false,
     "read_only_alternatives": []
 }
