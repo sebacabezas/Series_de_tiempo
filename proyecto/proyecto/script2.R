@@ -141,7 +141,7 @@ summary(fit)
 TS.diag(fit$res)
 pre <- forecast::forecast(fit, h = 100, level = 0.95)
 par(mfrow = c(1,1), bty = "n", las = 1, font.main = 1)
-plot(pre)
+plot(pre, bty = "las", n = 1, main = "")
 
 lines(Y, col = "red")
 
@@ -225,11 +225,11 @@ fit5 = forecast::auto.arima(Y)
 
 fit5
 
-fit5 <- forecast::Arima(Y, 
-                        order = c(1,0,7), 
-                        seasonal = c(1,1,0),
-                        include.drift = TRUE,
-                        fixed = c(NA,NA,NA,NA,0,0,NA,NA,NA,NA))
+#fit5 <- forecast::Arima(Y, 
+#                        order = c(1,0,7), 
+#                        seasonal = c(1,1,0),
+#                        include.drift = TRUE,
+#                        fixed = c(NA,NA,NA,NA,0,0,NA,NA,NA,NA))
 
 
 TS.diag(fit5$res)
@@ -252,8 +252,7 @@ exogenas1 = data.frame("IMACEC" = df$IMACEC_forecast[1:72],
                        "auxiliar" = df$Dx_6_L_R[1:72])
 exogenas2 = data.frame("IMACEC" = df$IMACEC_forecast[73:length(df$IMACEC_forecast)],
                        "Poblacion" = df$Poblacion_comuna[73:length(df$IMACEC_forecast)],
-                       "PIB" = df$PIB_var_an_porc[73:length(df$PIB_var_an_porc)],
-                       "auxiliar" = auxiliar2)
+                       "PIB" = df$PIB_var_an_porc[73:length(df$PIB_var_an_porc)])
 
 #exogenas1 = data.frame("IMACEC" = df$IMACEC_forecast[1:60],
 #                       "Poblacion" = df$Poblacion_comuna[1:60],
@@ -271,10 +270,9 @@ fit4 <- forecast::auto.arima(Y, max.d = 1, max.D = 1, max.p = 6, max.q = 6,
 fit4
 
 fit4 <- forecast::Arima(Y, 
-                        order = c(1,0,4), 
+                        order = c(1,0,0), 
                         seasonal = c(1,1,0),
-                        include.drift = TRUE,
-                        fixed = c(NA,NA,NA,0,NA,NA,NA,NA),
+                        include.drift = FALSE,
                         xreg = as.matrix(exogenas1[,2]))
 
 
@@ -294,7 +292,9 @@ TS.diag(fit4$res)
 
 pre4 <- forecast::forecast(fit4, level = 0.95, xreg = as.matrix(exogenas2[,2]))
 par(mfrow = c(1,1), bty = "n", las = 1, font.main = 1)
-plot(pre4)
+plot(pre4, bty = "last", n = 1, main = "")
+
+coeftest(fit4)
 
 # -------------------------------------------------------------------------
 
@@ -344,10 +344,12 @@ lines(Y, col = "red")
 
 # -------------------------------------------------------------------------
 
-Y <- ts(df$Dx_6_R500[1:60], start = c(2016,1), frequency = 12, end = c(2020,12))
+Y <- ts(df$Dx_6_R500[1:72], start = c(2016,1), frequency = 12, end = c(2021,12))
 
 fit <- forecast::auto.arima(Y, max.d = 6, max.D = 6, max.p = 6, max.q = 6, 
                             max.P = 6, max.Q = 6, lambda = NULL)
+
+fit = forecast::auto.arima(Y)
 
 summary(fit)
 TS.diag(fit$res)
@@ -361,17 +363,17 @@ Y <- ts(df$Dx_6_R500[1:72], start = c(2016,1), frequency = 12, end = c(2021,12))
 
 val_cruzada = sum(abs(pre$fitted[1:12]-Y[61:72]))/12
 
-
+lillie.test(fit$residuals)
 
 
 
 ##### 
 Y <- ts(df$Dx_6_R500[1:60], start = c(2016,1), frequency = 12, end = c(2020,12))
 fit1 <- forecast::Arima(Y, 
-                        order = c(1,0,6), 
+                        order = c(1,0,3), 
                         seasonal = c(1,1,0),
                         include.drift = TRUE,
-                        fixed = c(NA,NA,NA,NA,0,0,NA,NA,NA))
+                        fixed = c(NA,0,0,NA,NA,NA))
 
 TS.diag(fit1$res)
 
@@ -454,7 +456,9 @@ fit5 <- forecast::Arima(Y,
                         include.drift = TRUE,
                         fixed = c(NA,NA,NA,NA,0,0,NA,NA,NA,NA))
 
-
+#pre1
+#pre2
+#pre5
 TS.diag(fit5$res)
 
 pre5 <- forecast::forecast(fit5, h = 100, level = 0.95)
@@ -477,8 +481,7 @@ exogenas1 = data.frame("IMACEC" = df$IMACEC_forecast[1:60],
                        "auxiliar" = df$Dx_6_L_R[1:60])
 exogenas2 = data.frame("IMACEC" = df$IMACEC_forecast[61:length(df$IMACEC_forecast)],
                        "Poblacion" = df$Poblacion_comuna[61:length(df$IMACEC_forecast)],
-                       "PIB" = df$PIB_var_an_porc[61:length(df$PIB_var_an_porc)],
-                       "auxiliar" = auxiliar2)
+                       "PIB" = df$PIB_var_an_porc[61:length(df$PIB_var_an_porc)])
 
 #exogenas1 = data.frame("IMACEC" = df$IMACEC_forecast[1:60],
 #                       "Poblacion" = df$Poblacion_comuna[1:60],
@@ -491,15 +494,21 @@ exogenas2 = data.frame("IMACEC" = df$IMACEC_forecast[61:length(df$IMACEC_forecas
 
 fit4 <- forecast::auto.arima(Y, max.d = 1, max.D = 1, max.p = 6, max.q = 6, 
                              max.P = 6, max.Q = 6, lambda = NULL, xreg = as.matrix(exogenas1[,2]))
+fit4 <- forecast::Arima(Y, 
+                        order = c(1,0,0), 
+                        seasonal = c(1,1,0),
+                        include.drift = FALSE,
+                        xreg = as.matrix(exogenas1[,2]))
+
 
 fit4
 
-fit4 <- forecast::Arima(Y, 
-                        order = c(1,0,4), 
-                        seasonal = c(1,1,0),
-                        include.drift = TRUE,
-                        fixed = c(NA,NA,NA,0,NA,NA,NA,NA),
-                        xreg = as.matrix(exogenas1[,2]))
+#fit4 <- forecast::Arima(Y, 
+#                        order = c(1,0,4), 
+#                        seasonal = c(1,1,0),
+#                        include.drift = TRUE,
+#                        fixed = c(NA,NA,NA,0,NA,NA,NA,NA),
+#                        xreg = as.matrix(exogenas1[,2]))
 
 
 fit4
@@ -530,6 +539,13 @@ val_cruzada4 = sum(abs(pre4$fitted[1:12]-Y[61:72]))/12
 # -------------------------------------------------------------------------
 
 # ajustes -----------------------------------------------------------------
+# MAPE FIT
+mean(abs(fit$residuals)/(abs(Y)))
+# MAPE FIT4
+mean(abs(fit4$residuals)/(abs(Y)))
+
+val_cruzada = sum(abs(pre$fitted[1:12])/(abs(Y[61:72])))/12
+val_cruzada4 = sum(abs(pre4$fitted[1:12])/(abs(Y[61:72])))/12
 
 fit
 fit1
@@ -552,12 +568,17 @@ summary(fit3) #MAPE = 2.0253 RMSE = 5587 *
 summary(fit4) #MAPE = 2.3618 RMSE = 5549
 summary(fit5) #MAPE = 2.0454 RMSE = 5465 *
 
+Box.test(fit$residuals, lag = 3)
+
 plot(pre , xlim = c(2016,2031), ylim = c(50000, 250000))
 plot(pre1, xlim = c(2016,2031), ylim = c(50000, 250000))
 plot(pre2, xlim = c(2016,2031), ylim = c(50000, 250000))
 plot(pre3, xlim = c(2016,2031), ylim = c(50000, 250000))
 plot(pre4, xlim = c(2016,2031), ylim = c(50000, 250000))
 plot(pre5, xlim = c(2016,2031), ylim = c(50000, 250000))
+
+ks.test(fit4$residuals, "pnorm")
+lillie.test(fit4$residuals)
 
 TS.diag(fit$residuals )
 TS.diag(fit1$residuals)
@@ -574,12 +595,13 @@ lillie.test(fit4$residuals)
 lillie.test(fit5$residuals)
 
 # Todos son homocedasticos
-bptest(lm( fit$residuals~df$tiempo[1:72]))
-bptest(lm(fit1$residuals~df$tiempo[1:72]))
-bptest(lm(fit2$residuals~df$tiempo[1:72]))
-bptest(lm(fit3$residuals~df$tiempo[1:72]))
-bptest(lm(fit4$residuals~df$tiempo[1:72]))
-bptest(lm(fit5$residuals~df$tiempo[1:72]))
+library(lmtest)
+bptest(lm( fit$residuals~time(Y)[1:72]))
+bptest(lm(fit1$residuals~time(Y)[1:60]))
+bptest(lm(fit2$residuals~time(Y)[1:60]))
+bptest(lm(fit3$residuals~time(Y)[1:60]))
+bptest(lm(fit4$residuals~time(Y)[1:72]))
+bptest(lm(fit5$residuals~time(Y)[1:60]))
 
 val_cruzada
 val_cruzada1

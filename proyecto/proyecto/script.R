@@ -43,12 +43,12 @@ plot(lr.ts)
 
 par(mfrow = c(1,1))
 acf(lr.ts,lag=100)
-pacf(lr.ts,lag=100)
+pacf(lr.ts,lag=100, lwd = 2, main = "")
 
 r500.ts <- ts(r_500,start=c(2016,01), end=c(2021,12), frequency = 12)
 plot(r500.ts)
 acf(r500.ts,lag=100)
-pacf(r500.ts,lag=100)
+pacf(r500.ts,lag=100, lwd = 2, main = "")
 par(mfrow = c(1,1))
 
 mod1_lr <- auto.arima(lr.ts) #Todas las variables son significativas
@@ -229,7 +229,7 @@ fit <- forecast::Arima(Y,
                        xreg = as.matrix(exogenas1[,2]))
 
 TS.diag(fit$res)
-
+summary(fit)
 library(nortest)
 lillie.test(fit$residuals)
 
@@ -239,7 +239,7 @@ plot(pre)
 
 lines(Y, col = "red")
 
-
+mean(abs(fit2$residuals)/(abs(Y)))
 # -------------------------------------------------------------------------
 # Modelo 2: Sin variables exogenas:
 
@@ -249,23 +249,52 @@ fit2 <- forecast::auto.arima(Y, max.d = 6,
 
 TS.diag(fit2$res)
 
-fit2 <- forecast::Arima(Y, 
-                       order = c(1,0,5), 
-                       seasonal = c(2,1,0),
-                       include.drift = TRUE,
-                       fixed = c(NA,NA,0,0,0,NA,NA,NA,NA))
+# fit2 <- forecast::Arima(Y, 
+#                       order = c(1,0,7), 
+#                       seasonal = c(2,1,0),
+#                       include.drift = TRUE,
+#                       fixed = c(NA,0,0,0,0,0,0,NA,NA,NA,NA))
 TS.diag(fit2$res)
 library(nortest)
 lillie.test(fit2$residuals)
 
 pre <- forecast::forecast(fit2, h = 108, level = 0.95)
 par(mfrow = c(1,1), bty = "n", las = 1, font.main = 1)
-plot(pre, xlim = c(2016,2030), ylim = c(190000, 310000), main = "", n = 1, bty = "las")
+plot(pre, xlim = c(2016,2030), ylim = c(190000, 330000), main = "", n = 1, bty = "las")
 
-
+ks.test(fit2$residuals, "pnorm")
 auxiliar2 = pre$mean
 
-lines(Y, col = "red")
+lines(Y, col = "black")
+
+(1-pnorm(abs(fit2$coef[c(1,6,7,8,9)])/sqrt(diag(fit2$var.coef))))*2
+
+coeftest(fit2)
+
+mean(abs(fit2$residuals)/(abs(Y)))
+# MAPE FIT4
+mean(abs(fit4$residuals)/(abs(Y)))
+
+val_cruzada = sum(abs(pre$fitted[1:12])/(abs(Y[61:72])))/12
+val_cruzada4 = sum(abs(pre4$fitted[1:12])/(abs(Y[61:72])))/12
+
+library(ggplot2)
+library(dplyr)
+require(nlme)
+
+# Dummy data
+data <- data.frame(
+  day = seq(as.Date("2016/1/1"), as.Date("2030/12/1"), "months"),
+  value = as.vector(c(Y[1:72], as.vector(pre$mean))),
+  lower = c(rep(NA,72), c(pre$lower) ),
+  upper = c(rep(NA,72), c(pre$upper) )
+)
+
+p = ggplot(data=data, aes(x=day, y=value)) +
+  geom_line()+
+  xlab("años")+
+  geom_ribbon(data=data,aes(ymin=lower,ymax=upper), alpha = 0.3)
+p
 
 # -------------------------------------------------------------------------
 
@@ -300,7 +329,7 @@ lines(as.vector(time(Y))[1:60], as.vector(fit$fitted), col = "blue")
 pre$fitted[1:12]
 Y[61:72]
 
-val_cruzada = sum(abs(pre$fitted[1:12]-Y[61:72]))/12
+val_cruzada = sum(abs(pre$fitted[1:12])/(abs(Y[61:72])))/12
 
 Y <- ts(df$Dx_6_L_R[1:72], start = c(2016,1), frequency = 12, end = c(2021,12))
 lines(Y, col = "red")
@@ -329,9 +358,30 @@ lines(as.vector(time(Y))[1:60], as.vector(fit2$fitted), col = "blue")
 Y <- ts(df$Dx_6_L_R[1:72], start = c(2016,1), frequency = 12, end = c(2021,12))
 lines(Y, col = "red")
 
-val_cruzada2 = sum(abs(pre2$fitted[1:12]-Y[61:72]))/12
+val_cruzada2 = sum(abs(pre2$fitted[1:12])/(abs(Y[61:72])))/12
 
 
+
+
+
+# -------------------------------------------------------------------------
+
+# empirico
+
+source("Bartlett.R")
+
+par(mfrow = c(1,1))
+serie = Y
+n = length(serie)
+aux = acf(serie, lag.max = 60, ylim = c(-1,+1), main = "ACF empirico vs estimado")
+ACF <- ARMAacf(ma = fit2$coef[2:6], lag.max = 60)
+Lag = 0:60
+lines(ACF ~ Lag, type = "p", col = "red", pch = 20)
+w <- Bartlett(ma = fit2$coef[2:6], lag.max = 5)
+LI = ACF[2:21]-qnorm(0.975)*sqrt(w/n)
+LS = ACF[2:21]+qnorm(0.975)*sqrt(w/n)
+lines(LI, col = "red", lty = 2)
+lines(LS, col = "red", lty = 2)
 
 
 
